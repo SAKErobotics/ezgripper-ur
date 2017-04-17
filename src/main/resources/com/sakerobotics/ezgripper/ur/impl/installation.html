@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>EZGripper</title>
+		<style>
+			label, input {
+				display: inline-block;
+				width: 200px;
+				height: 28px;
+			}
+			
+			div.spacer {
+				padding-top: 10px;
+	 		}
+		</style>
+	</head>
+	<body>
+		<h1>EZGripper</h1>
+		<div class="spacer">&nbsp;</div>		
+		<form>
+			<input id="btnEnableDaemon" type="button" value="Start Daemon"/>
+			<input id="btnDisableDaemon" type="button" value="Stop Daemon"/>
+			<div class="spacer">&nbsp;</div>
+			<label id="lblDaemonStatus">Status of daemon</label>
+			
+			<p>Try operations:</p>
+			<input id="btnCalibrate" type="button" value="Calibrate"/>
+			<input id="btnRelease" type="button" value="Release"/>
+			<br/> &nbsp; <br/>
+			<input id="btnOpen" type="button" value="Open"/>
+			<input id="btnClose" type="button" value="Close"/>
+			<br/> &nbsp; <br/>
+<!--			Command: <input id="txtCommand" type="text" value="ls -l /dev/ttyU*"/>
+			  <input id="btnExec" type="button" value="Execute" style="width: 100px;"/>
+			<br/> &nbsp; <br/> -->
+			<input id="txtOutput" type="text" value="Output" style="width: 600px; height: 150px"/>
+		</form>
+	</body>
+</html>

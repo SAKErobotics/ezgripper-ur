@@ -99,6 +99,11 @@ public class XmlRpcEzgripperInterface {
 		return processString(result);
 	}
 
+	public int get_position() throws XmlRpcException {
+		Object result = client.execute("ezg_get_position", Collections.emptyList());
+		return processInt(result);
+	}
+
 	public String init_connection() throws XmlRpcException {
 		Object result = client.execute("ezg_init_connection", Collections.emptyList());
 		return processString(result);
@@ -111,4 +116,13 @@ public class XmlRpcEzgripperInterface {
 			return "";
 		}
 	}
+	
+	private int processInt(Object response) {
+		if (response instanceof Integer) {
+			return (Integer) response;
+		} else {
+			return -1;
+		}
+	}
+	
 }

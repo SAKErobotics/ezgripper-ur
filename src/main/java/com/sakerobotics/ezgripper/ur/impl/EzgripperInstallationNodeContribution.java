@@ -118,6 +118,9 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 			System.out.println("OPEN");
 			try {
 				xmlRpcDaemonInterface.gripperOpen();
+				
+				int pos = xmlRpcDaemonInterface.get_position();
+				System.out.println("GET_POS="+pos);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -129,6 +132,9 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 			System.out.println("CLOSE");
 			try {
 				xmlRpcDaemonInterface.gripperClose();
+				
+				int pos = xmlRpcDaemonInterface.get_position();
+				System.out.println("GET_POS="+pos);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

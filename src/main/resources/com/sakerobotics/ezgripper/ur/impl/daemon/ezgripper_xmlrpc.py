@@ -100,6 +100,10 @@ def ezg_exec(cmd):
 def ezg_get_last_message():
     return last_message
 
+def ezg_get_position():
+    position = gripper.get_position()
+    log("GET_POSITION = %d"%(position))
+    return position
 
 def ezg_init_connection():
     global last_message, connection, gripper
@@ -142,6 +146,7 @@ server.register_function(ezg_move, "ezg_move")
 server.register_function(ezg_ping, "ezg_ping")
 server.register_function(ezg_exec, "ezg_exec")
 server.register_function(ezg_get_last_message, "ezg_get_last_message")
+server.register_function(ezg_get_position, "ezg_get_position")
 server.register_function(ezg_init_connection, "ezg_init_connection")
 
 log("starting serve_forever()")

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>EZGripper</title>
 		<style>
 			label, input {
 				display: inline-block;
@@ -16,32 +15,26 @@
 		</style>
 	</head>
 	<body>
+			<div id="liveImageImgDiv"><img src="none.png" id="liveImage" style="width: 300px; height: 200px"/></div>
 		<form>
+			<input id="btnGoto" type="button" value="GoTo" style="width: 114px; height: 50px"/>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			Position <input id="txtGoto1" type="number" value="50" style="width: 80px; height: 28px" min="0" max="100" step="5"/>
+			Force <input id="txtGoto2" type="number" value="50" style="width: 80px; height: 28px" min="0" max="100" step="5"/>
+			<br/>
+			&nbsp;
+			<br/>
+			<input id="btnClose" type="button" value="Close" style="width: 114px; height: 50px"/>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			Force <input id="txtClose" type="number" value="50" style="width: 80px; height: 28px" min="0" max="100" step="5"/>
+			<br/>
+			&nbsp;
+			<br/>
 			<input id="btnCalibrate" type="button" value="Calibrate" style="width: 114px; height: 50px"/>
 			<br/>
 			&nbsp;
 			<br/>
-			<input id="btnRelease" type="button" value="Release" style="width: 584px; height: 50px"/>
-			<br/>
-			&nbsp;
-			<br/>
-			<input id="btnClose100" type="button" value="Hard Close, 100% force"  style="width: 192px; height: 70px"/>
-			<input id="btnClose50"  type="button" value="Medium Close, 50% force" style="width: 192px; height: 70px"/>
-			<input id="btnClose10"  type="button" value="Soft Close, 10% force"   style="width: 192px; height: 70px"/>
-			<br/>
-			&nbsp;
-			<br/>
-			<input id="btnOpen10" type="button" value="10% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen20" type="button" value="20% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen30" type="button" value="30% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen40" type="button" value="40% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen50" type="button" value="50% Open" style="width: 114px; height: 70px"/>
-			<br/>
-			<input id="btnOpen60" type="button" value="60% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen70" type="button" value="70% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen80" type="button" value="80% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen90" type="button" value="90% Open" style="width: 114px; height: 70px"/>
-			<input id="btnOpen100" type="button" value="100% Open" style="width: 114px; height: 70px"/>
+			<label id="lblStatus" style="width: 600px">Status:</label>
 		</form>
 	</body>
 </html>

@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ##
 
-from libezgripper import create_connection, Gripper
+from libezgripper import create_connection, Gripper, find_servos_on_all_ports
 
 import time
 #import sys
@@ -105,18 +105,45 @@ def ezg_get_position():
     log("GET_POSITION = %d"%(position))
     return position
 
+def ezg_get_positions():
+    positions = gripper.get_positions()
+    log("GET POSITIONS = %s"%(str(positions)))
+    return positions
+
+def ezg_get_temperatures():
+    temperatures = gripper.get_temperatures()
+    log("GET TEMPERATURES = %s"%(str(temperatures)))
+    return temperatures
+
+def ezg_get_ids():
+    return ids
+
+def ezg_get_devname():
+    print "returning dev_name:", dev_name
+    return dev_name
+
 def ezg_init_connection():
-    global last_message, connection, gripper
+    global dev_name, ids, last_message, connection, gripper
     try:
-        connection = create_connection(dev_name='/dev/ttyUSB0', baudrate=57600)
-        #connection = create_connection(dev_name='hwgrep://0403:6001', baudrate=57600)
-        gripper = Gripper(connection, 'gripper1', [1])
-        last_message = ""
+        s = find_servos_on_all_ports(max_id=10)
+        if s:
+            dev_name, ids = s[0]
+            print "dev", dev_name
+            print "ids", ids
+            connection = create_connection(dev_name=dev_name, baudrate=57600)
+            #connection = create_connection(dev_name='/dev/ttyUSB0', baudrate=57600)
+            #connection = create_connection(dev_name='hwgrep://0403:6001', baudrate=57600)
+            #gripper = Gripper(connection, 'gripper1', [1])
+            gripper = Gripper(connection, 'gripper1', ids)
+            last_message = ""
+        else:
+            last_message = "No grippers found"
     except Exception, e:
         last_message = str(e)
     return last_message
 
-
+dev_name = ""
+ids = []
 last_message = ""
 connection = None
 gripper = None
@@ -147,6 +174,10 @@ server.register_function(ezg_ping, "ezg_ping")
 server.register_function(ezg_exec, "ezg_exec")
 server.register_function(ezg_get_last_message, "ezg_get_last_message")
 server.register_function(ezg_get_position, "ezg_get_position")
+server.register_function(ezg_get_positions, "ezg_get_positions")
+server.register_function(ezg_get_temperatures, "ezg_get_temperatures")
+server.register_function(ezg_get_ids, "ezg_get_ids")
+server.register_function(ezg_get_devname, "ezg_get_devname")
 server.register_function(ezg_init_connection, "ezg_init_connection")
 
 log("starting serve_forever()")

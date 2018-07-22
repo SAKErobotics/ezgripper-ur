@@ -42,8 +42,11 @@ import com.ur.urcap.api.ui.component.LabelComponent;
 import com.ur.urcap.api.contribution.InstallationNodeContribution;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.apache.xmlrpc.XmlRpcException;
 
 public class EzgripperInstallationNodeContribution implements InstallationNodeContribution {
 	private static final String XMLRPC_VARIABLE = "ezgripper_daemon";
@@ -53,6 +56,8 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 	private final EzgripperDaemonService daemonService;
 	private XmlRpcEzgripperInterface xmlRpcDaemonInterface;
 	private Timer uiTimer;
+	private String servoIds = "";
+	private String devName = "";
 
 	public EzgripperInstallationNodeContribution(EzgripperDaemonService daemonService, DataModel model) {
 		this.daemonService = daemonService;
@@ -61,12 +66,12 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 		applyDesiredDaemonStatus();
 	}
 
-	@Input(id = "btnEnableDaemon")
-	private InputButton enableDaemonButton;
-	@Input(id = "btnDisableDaemon")
-	private InputButton disableDaemonButton;
-	@Label(id = "lblDaemonStatus")
-	private LabelComponent daemonStatusLabel;
+//	@Input(id = "btnEnableDaemon")
+//	private InputButton enableDaemonButton;
+//	@Input(id = "btnDisableDaemon")
+//	private InputButton disableDaemonButton;
+	@Label(id = "lblStatus")
+	private LabelComponent lblStatus;
 
 	@Input(id = "btnCalibrate")
 	private InputButton calibrateButton;
@@ -85,21 +90,21 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 	private InputButton execButton;
 	
 	
-	@Input(id = "btnEnableDaemon")
-	public void onStartClick(InputEvent event) {
-		if (event.getEventType() == InputEvent.EventType.ON_CHANGE) {
-			setDaemonEnabled(true);
-			applyDesiredDaemonStatus();
-		}
-	}
-
-	@Input(id = "btnDisableDaemon")
-	public void onStopClick(InputEvent event) {
-		if (event.getEventType() == InputEvent.EventType.ON_CHANGE) {
-			setDaemonEnabled(false);
-			applyDesiredDaemonStatus();
-		}
-	}
+//	@Input(id = "btnEnableDaemon")
+//	public void onStartClick(InputEvent event) {
+//		if (event.getEventType() == InputEvent.EventType.ON_CHANGE) {
+//			setDaemonEnabled(true);
+//			applyDesiredDaemonStatus();
+//		}
+//	}
+//
+//	@Input(id = "btnDisableDaemon")
+//	public void onStopClick(InputEvent event) {
+//		if (event.getEventType() == InputEvent.EventType.ON_CHANGE) {
+//			setDaemonEnabled(false);
+//			applyDesiredDaemonStatus();
+//		}
+//	}
 	
 	@Input(id = "btnCalibrate")
 	public void onCalibrateClick(InputEvent event) {
@@ -169,6 +174,12 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 	@Override
 	public void openView() {
 		try {
+			servoIds = Arrays.toString(xmlRpcDaemonInterface.get_ids());
+			devName = xmlRpcDaemonInterface.get_devname();
+		} catch (XmlRpcException e) {
+			e.printStackTrace();
+		}
+		try {
 			outputField.setText(xmlRpcDaemonInterface.get_last_message());
 		} catch (Exception e) {}
 		
@@ -188,29 +199,15 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 	}
 
 	private void updateUI() {
-		DaemonContribution.State state = getDaemonState();
-
-		if (state == DaemonContribution.State.RUNNING) {
-			enableDaemonButton.setEnabled(false);
-			disableDaemonButton.setEnabled(true);
-		} else {
-			enableDaemonButton.setEnabled(true);
-			disableDaemonButton.setEnabled(false);
+		String statusString="";
+		try {
+			int[] pos = xmlRpcDaemonInterface.get_positions();
+			int[] temps = xmlRpcDaemonInterface.get_temperatures();
+			statusString = devName + " ids="+servoIds+" positions="+Arrays.toString(pos)+" temperatures="+Arrays.toString(temps);
+		} catch (XmlRpcException e) {
+			e.printStackTrace();
 		}
-
-		String text = "";
-		switch (state) {
-		case RUNNING:
-			text = "Daemon runs";
-			break;
-		case STOPPED:
-			text = "Daemon stopped";
-			break;
-		case ERROR:
-			text = "Daemon failed";
-			break;
-		}
-		daemonStatusLabel.setText(text);
+		lblStatus.setText("Status: "+statusString);
 	}
 
 	@Override
@@ -255,9 +252,9 @@ public class EzgripperInstallationNodeContribution implements InstallationNodeCo
 		return model.get(ENABLED_KEY, true); //This daemon is enabled by default
 	}
 
-	private void setDaemonEnabled(Boolean enable) {
-		model.set(ENABLED_KEY, enable);
-	}
+//	private void setDaemonEnabled(Boolean enable) {
+//		model.set(ENABLED_KEY, enable);
+//	}
 
 	public String getXMLRPCVariable(){
 		return XMLRPC_VARIABLE;

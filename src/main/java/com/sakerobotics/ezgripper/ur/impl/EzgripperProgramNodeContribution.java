@@ -30,6 +30,13 @@
  */
 package com.sakerobotics.ezgripper.ur.impl;
 
+import java.awt.EventQueue;
+import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.imageio.ImageIO;
+
 import org.apache.xmlrpc.XmlRpcException;
 
 import com.ur.urcap.api.contribution.ProgramNodeContribution;
@@ -37,8 +44,13 @@ import com.ur.urcap.api.domain.URCapAPI;
 import com.ur.urcap.api.domain.data.DataModel;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 import com.ur.urcap.api.ui.annotation.Input;
+import com.ur.urcap.api.ui.annotation.Label;
+import com.ur.urcap.api.ui.annotation.Img;
 import com.ur.urcap.api.ui.component.InputButton;
 import com.ur.urcap.api.ui.component.InputEvent;
+import com.ur.urcap.api.ui.component.InputTextField;
+import com.ur.urcap.api.ui.component.LabelComponent;
+import com.ur.urcap.api.ui.component.ImgComponent;
 
 public class EzgripperProgramNodeContribution implements ProgramNodeContribution {
 	
@@ -60,6 +72,10 @@ public class EzgripperProgramNodeContribution implements ProgramNodeContribution
 				getInstallation().getXmlRpcDaemonInterface().gripperMove(extractNumber(), 100);
 			} else if (opString.contains("close")) {
 				getInstallation().getXmlRpcDaemonInterface().gripperMove(0, extractNumber());
+			} else if (opString.contains("goto")) {
+				String[] s = opString.split("\\s+");
+				getInstallation().getXmlRpcDaemonInterface().gripperMove(
+						Integer.parseInt(s[1]), Integer.parseInt(s[2]));
 			}
 		}
 		public String getScriptLine() {
@@ -77,6 +93,11 @@ public class EzgripperProgramNodeContribution implements ProgramNodeContribution
 				return getInstallation().getXMLRPCVariable() +
 						String.format(".ezg_move(0, %d)", extractNumber());
 			}
+			if (opString.contains("goto")) {
+				String[] s = opString.split("\\s+");
+				return getInstallation().getXMLRPCVariable() +
+						String.format(".ezg_move(%s, %s)", s[1], s[2]);
+			}
 			return "# Unknown operation: " + opString;
 		}
 	}
@@ -85,101 +106,79 @@ public class EzgripperProgramNodeContribution implements ProgramNodeContribution
 
 	private final DataModel model;
 	private final URCapAPI api;
+	private Timer uiTimer;
+	private String servoIds = "";
 
 	public EzgripperProgramNodeContribution(URCapAPI api, DataModel model) {
 		this.api = api;
 		this.model = model;
 	}
 
+	@Label(id = "lblStatus")
+	private LabelComponent lblStatus; 
+	
+	@Img(id = "liveImage")
+	private ImgComponent liveImage;
+	
+	@Input(id = "btnGoto")
+	private InputButton gotoButton;
+	@Input(id = "btnClose")
+	private InputButton closeButton;
+	
+	@Input(id = "txtGoto1")
+	private InputTextField goto1Field;
+	@Input(id = "txtGoto2")
+	private InputTextField goto2Field;
+	@Input(id = "txtClose")
+	private InputTextField closeField;
+	
+	
 	@Input(id = "btnCalibrate")
 	private InputButton calibrateButton;
-	@Input(id = "btnRelease")
-	private InputButton releaseButton;
-	@Input(id = "btnOpen10")
-	private InputButton open10Button;
-	@Input(id = "btnOpen20")
-	private InputButton open20Button;
-	@Input(id = "btnOpen30")
-	private InputButton open30Button;
-	@Input(id = "btnOpen40")
-	private InputButton open40Button;
-	@Input(id = "btnOpen50")
-	private InputButton open50Button;
-	@Input(id = "btnOpen60")
-	private InputButton open60Button;
-	@Input(id = "btnOpen70")
-	private InputButton open70Button;
-	@Input(id = "btnOpen80")
-	private InputButton open80Button;
-	@Input(id = "btnOpen90")
-	private InputButton open90Button;
-	@Input(id = "btnOpen100")
-	private InputButton open100Button;
-	@Input(id = "btnClose10")
-	private InputButton close10Button;
-	@Input(id = "btnClose50")
-	private InputButton close50Button;
-	@Input(id = "btnClose100")
-	private InputButton close100Button;
 
+	public void showPic(int n) {
+		String picName = "/com/sakerobotics/ezgripper/ur/impl/img/EZGripper"+n+".png";
+		try{
+			liveImage.setImage(ImageIO.read(getClass().getResource(picName)));
+		} catch (java.io.IOException e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	@Input(id = "txtGoto1")
+	public void txtGoto1Event(InputEvent event) throws Exception {
+		if (event.getEventType() == InputEvent.EventType.ON_CHANGE) {
+			showPic(Integer.parseInt(goto1Field.getText())/5);
+		}
+	}
+
+	
+	@Input(id = "btnGoto")
+	public void onGotoClick(InputEvent event) throws Exception {
+		if (event.getEventType() == InputEvent.EventType.ON_CHANGE) {
+			String text = "GoTo " + goto1Field.getText() + " " + goto2Field.getText();
+			model.set(OPERATION, text);
+			Operation op = new Operation(text);
+			op.execute();
+		}
+	}
+	@Input(id = "btnClose")
+	public void onCloseNewClick(InputEvent event) throws Exception {
+		if (event.getEventType() == InputEvent.EventType.ON_CHANGE) {
+			String text = "Close " + closeField.getText();
+			model.set(OPERATION, text);
+			Operation op = new Operation(text);
+			op.execute();
+			
+			goto1Field.setText("0");
+			goto2Field.setText(closeField.getText());
+			showPic(0);
+		}
+	}
+	
+	
 	@Input(id = "btnCalibrate")
 	public void onCalibrateClick(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnRelease")
-	public void onReleaseClick(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen10")
-	public void onOpen10Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen20")
-	public void onOpen20Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen30")
-	public void onOpen30Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen40")
-	public void onOpen40Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen50")
-	public void onOpen50Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen60")
-	public void onOpen60Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen70")
-	public void onOpen70Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen80")
-	public void onOpen80Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen90")
-	public void onOpen90Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnOpen100")
-	public void onOpen100Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnClose10")
-	public void onClose10Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnClose50")
-	public void onClose50Click(InputEvent event) throws Exception {
-		newOperation(event);
-	}
-	@Input(id = "btnClose100")
-	public void onCloseClick(InputEvent event) throws Exception {
 		newOperation(event);
 	}
 	
@@ -195,10 +194,57 @@ public class EzgripperProgramNodeContribution implements ProgramNodeContribution
 	
 	@Override
 	public void openView() {
+		String opString = model.get(OPERATION, "goto 50 50").toLowerCase();
+		if (opString.contains("goto")) {
+			String[] s = opString.split("\\s+");
+			goto1Field.setText(s[1]);
+			goto2Field.setText(s[2]);
+		} else if (opString.contains("open")) {
+			goto1Field.setText(opString.replaceAll("\\D", ""));
+			goto2Field.setText("100");
+		} else if (opString.contains("close")) {
+			goto1Field.setText("0");
+			goto2Field.setText(opString.replaceAll("\\D", ""));
+			closeField.setText(opString.replaceAll("\\D", ""));
+		}
+		showPic(Integer.parseInt(goto1Field.getText())/5);
+		
+		try {
+			servoIds = Arrays.toString(getInstallation().getXmlRpcDaemonInterface().get_ids());
+		} catch (XmlRpcException e) {
+			e.printStackTrace();
+		}
+		
+		// UI updates from non - GUI threads must use EventQueue.invokeLater ( or SwingUtilities.invokeLater )
+		uiTimer = new Timer ( true ) ;
+		uiTimer.schedule( new TimerTask () {
+			@Override
+			public void run () {
+				EventQueue.invokeLater( new Runnable () {
+					@Override
+					public void run () {
+						updateUI ();
+					}
+				}) ;
+			}
+		} , 0 , 1000) ;
 	}
 
+	private void updateUI() {
+		String statusString="";
+		try {
+			int[] pos = getInstallation().getXmlRpcDaemonInterface().get_positions();
+			int[] temps = getInstallation().getXmlRpcDaemonInterface().get_temperatures();
+			statusString = "ids="+servoIds+" positions="+Arrays.toString(pos)+" temperatures="+Arrays.toString(temps);
+		} catch (XmlRpcException e) {
+			e.printStackTrace();
+		}
+		lblStatus.setText("Status: "+statusString);
+	}
+	
 	@Override
 	public void closeView() {
+		uiTimer.cancel();
 	}
 
 	@Override

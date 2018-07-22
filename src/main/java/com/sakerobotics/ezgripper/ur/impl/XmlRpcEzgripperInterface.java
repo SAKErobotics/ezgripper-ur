@@ -104,11 +104,46 @@ public class XmlRpcEzgripperInterface {
 		return processInt(result);
 	}
 
+	public int[] get_positions() throws XmlRpcException {
+		Object result = client.execute("ezg_get_positions", Collections.emptyList());
+		return processIntArray(result);
+	}
+	
+	public int[] get_temperatures() throws XmlRpcException {
+		Object result = client.execute("ezg_get_temperatures", Collections.emptyList());
+		return processIntArray(result);
+	}
+	
+	public int[] get_ids() throws XmlRpcException {
+		Object result = client.execute("ezg_get_ids", Collections.emptyList());
+		return processIntArray(result);
+	}
+	
+	public String get_devname() throws XmlRpcException {
+		Object result = client.execute("ezg_get_devname", Collections.emptyList());
+		return processString(result);
+	}
+
 	public String init_connection() throws XmlRpcException {
 		Object result = client.execute("ezg_init_connection", Collections.emptyList());
 		return processString(result);
 	}
 
+	private int[] processIntArray(Object response) {
+		if (response instanceof Object[]) {
+			Object[] objs = (Object[]) response;
+			int[] intres = new int[objs.length];
+			for(int i=0; i<objs.length; i++) {
+				if (objs[i] instanceof Integer) {
+					intres[i] = (Integer)objs[i];
+				}
+			}
+			return intres;
+		} else {
+			return new int[0];
+		}
+	}
+	
 	private String processString(Object response) {
 		if (response instanceof String) {
 			return (String) response;

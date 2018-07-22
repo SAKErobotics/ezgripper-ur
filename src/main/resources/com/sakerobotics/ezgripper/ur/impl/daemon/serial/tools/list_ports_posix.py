@@ -64,6 +64,7 @@ if   plat[:5] == 'linux':    # Linux (confirmed)
                 )
 
     def usb_lsusb_string(sysfs_path):
+        base = os.path.basename(os.path.realpath(sysfs_path))
         bus, dev = os.path.basename(os.path.realpath(sysfs_path)).split('-')
         try:
             desc = popen(['lsusb', '-v', '-s', '%s:%s' % (bus, dev)])
